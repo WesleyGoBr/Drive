@@ -1,0 +1,846 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      color: #263238;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: auto;
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #17365d;
+    }
+
+    .card {
+      background: white;
+      padding: 18px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 7px rgba(0,0,0,.07);
+    }
+
+    .linha {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .campo {
+      margin-bottom: 13px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccd3dc;
+      border-radius: 6px;
+      font-size: 14px;
+      background: white;
+    }
+
+    input:disabled {
+      background: #edf0f3;
+      color: #667085;
+    }
+
+    textarea {
+      min-height: 75px;
+      resize: vertical;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      padding: 11px 17px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-right: 7px;
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .primario {
+      background: #17365d;
+      color: white;
+    }
+
+    .secundario {
+      background: #e7edf4;
+      color: #17365d;
+    }
+
+    .resultado {
+      margin-top: 12px;
+      padding: 11px;
+      border-radius: 6px;
+      display: none;
+      white-space: pre-wrap;
+    }
+
+    .sucesso {
+      display: block;
+      background: #e7f5ec;
+      color: #176b36;
+    }
+
+    .erro {
+      display: block;
+      background: #fdecec;
+      color: #a12626;
+    }
+
+    .oculto {
+      display: none;
+    }
+
+    .identificacao {
+      color: #667085;
+      font-size: 13px;
+      margin-bottom: 15px;
+    }
+
+    @media(max-width: 650px) {
+      .linha {
+        grid-template-columns: 1fr;
+      }
+
+      body {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2>Editar veículo</h2>
+
+  <div class="card">
+    <h3>Localizar veículo</h3>
+
+    <div class="linha">
+
+      <div class="campo">
+        <label for="pesquisa">
+          Código, placa, marca ou modelo
+        </label>
+
+        <input
+          id="pesquisa"
+          type="text"
+          placeholder="Ex.: VEI-0001 ou ABC1D23"
+        >
+      </div>
+
+      <div class="campo">
+        <label for="veiculoEncontrado">
+          Veículos encontrados
+        </label>
+
+        <select id="veiculoEncontrado">
+          <option value="">Pesquise para listar</option>
+        </select>
+      </div>
+
+    </div>
+
+    <button
+      class="primario"
+      id="btnPesquisar"
+      onclick="pesquisar()"
+    >
+      Pesquisar
+    </button>
+
+    <button
+      class="secundario"
+      id="btnCarregar"
+      onclick="carregarSelecionado()"
+    >
+      Carregar veículo
+    </button>
+
+  </div>
+
+  <div id="areaEdicao" class="card oculto">
+
+    <h3>Dados do veículo</h3>
+
+    <div
+      class="identificacao"
+      id="identificacao"
+    ></div>
+
+    <form
+      id="formVeiculo"
+      onsubmit="salvar(event)"
+    >
+
+      <div class="linha">
+
+        <div class="campo">
+          <label for="placa">Placa *</label>
+          <input id="placa" maxlength="8" required>
+        </div>
+
+        <div class="campo">
+          <label for="marca">Marca *</label>
+          <input id="marca" maxlength="80" required>
+        </div>
+
+        <div class="campo">
+          <label for="modelo">Modelo *</label>
+          <input id="modelo" maxlength="100" required>
+        </div>
+
+        <div class="campo">
+          <label for="tipoVeiculo">Tipo de veículo *</label>
+          <input id="tipoVeiculo" maxlength="50" required>
+        </div>
+
+        <div class="campo">
+          <label for="anoFabricacao">
+            Ano de fabricação
+          </label>
+          <input
+            id="anoFabricacao"
+            type="number"
+            min="1900"
+            max="2100"
+          >
+        </div>
+
+        <div class="campo">
+          <label for="anoModelo">Ano do modelo</label>
+          <input
+            id="anoModelo"
+            type="number"
+            min="1900"
+            max="2100"
+          >
+        </div>
+
+        <div class="campo">
+          <label for="tipoPropulsao">
+            Tipo de propulsão *
+          </label>
+
+          <select id="tipoPropulsao" required>
+            <option value="">Selecione</option>
+            <option value="COMBUSTAO">Combustão</option>
+            <option value="FLEX">Flex</option>
+            <option value="HIBRIDO">Híbrido</option>
+            <option value="HIBRIDO_PLUGIN">Híbrido plug-in</option>
+            <option value="ELETRICO">Elétrico</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="proprietarioTipo">
+            Tipo de proprietário *
+          </label>
+
+          <select
+            id="proprietarioTipo"
+            required
+            onchange="alterarProprietario()"
+          >
+            <option value="">Selecione</option>
+            <option value="MOTORISTA">
+              Motorista cadastrado
+            </option>
+            <option value="TERCEIRO">
+              Terceiro
+            </option>
+          </select>
+        </div>
+
+        <div class="campo oculto" id="campoMotorista">
+          <label for="proprietarioMotoristaID">
+            Motorista proprietário *
+          </label>
+
+          <select id="proprietarioMotoristaID">
+            <option value="">Selecione o motorista</option>
+          </select>
+        </div>
+
+        <div class="campo oculto" id="campoTerceiro">
+          <label for="proprietarioNome">
+            Nome do proprietário *
+          </label>
+
+          <input
+            id="proprietarioNome"
+            maxlength="150"
+          >
+        </div>
+
+        <div class="campo">
+          <label for="capacidadeTanqueLitros">
+            Capacidade do tanque (litros)
+          </label>
+
+          <input
+            id="capacidadeTanqueLitros"
+            type="number"
+            min="0"
+            step="0.01"
+          >
+        </div>
+
+        <div class="campo">
+          <label for="capacidadeBateriaKWh">
+            Capacidade da bateria (kWh)
+          </label>
+
+          <input
+            id="capacidadeBateriaKWh"
+            type="number"
+            min="0"
+            step="0.01"
+          >
+        </div>
+
+        <div class="campo">
+          <label for="hodometroAtual">
+            Hodômetro atual (km)
+          </label>
+
+          <input
+            id="hodometroAtual"
+            type="number"
+            min="0"
+            step="0.01"
+          >
+        </div>
+
+      </div>
+
+      <div class="campo">
+        <label for="observacoes">Observações</label>
+
+        <textarea
+          id="observacoes"
+          maxlength="2000"
+        ></textarea>
+      </div>
+
+      <button
+        class="primario"
+        id="btnSalvar"
+        type="submit"
+      >
+        Salvar alterações
+      </button>
+
+      <button
+        class="secundario"
+        type="button"
+        onclick="fecharEdicao()"
+      >
+        Fechar
+      </button>
+
+    </form>
+
+  </div>
+
+  <div id="mensagem" class="resultado"></div>
+
+</div>
+
+<script>
+
+  let veiculoAtual = null;
+  let motoristas = [];
+
+  function mensagem(texto, tipo) {
+    const elemento =
+      document.getElementById('mensagem');
+
+    elemento.textContent = texto;
+    elemento.className = 'resultado ' + tipo;
+  }
+
+  function limparMensagem() {
+    const elemento =
+      document.getElementById('mensagem');
+
+    elemento.textContent = '';
+    elemento.className = 'resultado';
+  }
+
+  // =====================================
+  // PESQUISAR VEICULOS
+  // =====================================
+
+  function pesquisar() {
+
+    const pesquisa =
+      document.getElementById('pesquisa').value.trim();
+
+    const botao =
+      document.getElementById('btnPesquisar');
+
+    limparMensagem();
+
+    botao.disabled = true;
+    botao.textContent = 'Pesquisando...';
+
+    google.script.run
+
+      .withSuccessHandler(function(resposta) {
+
+        botao.disabled = false;
+        botao.textContent = 'Pesquisar';
+
+        if (!resposta || !resposta.sucesso) {
+
+          mensagem(
+            resposta && resposta.mensagem
+              ? resposta.mensagem
+              : 'Não foi possível pesquisar os veículos.',
+            'erro'
+          );
+
+          return;
+        }
+
+        const select =
+          document.getElementById('veiculoEncontrado');
+
+        select.innerHTML = '';
+
+        const inicial =
+          document.createElement('option');
+
+        inicial.value = '';
+        inicial.textContent = 'Selecione um veículo';
+
+        select.appendChild(inicial);
+
+        resposta.veiculos.forEach(function(v) {
+
+          const option =
+            document.createElement('option');
+
+          option.value = v.VeiculoID;
+
+          option.textContent =
+            v.CodigoVeiculo + ' | ' +
+            v.Placa + ' | ' +
+            v.Marca + ' ' +
+            v.Modelo + ' | ' +
+            v.Status;
+
+          select.appendChild(option);
+
+        });
+
+        mensagem(
+          resposta.veiculos.length +
+          ' veículo(s) encontrado(s).',
+          'sucesso'
+        );
+
+      })
+
+      .withFailureHandler(function(erro) {
+
+        botao.disabled = false;
+        botao.textContent = 'Pesquisar';
+
+        mensagem(
+          erro.message || String(erro),
+          'erro'
+        );
+
+      })
+
+      .DCP_FORM235D_PESQUISAR_VEICULOS(pesquisa);
+
+  }
+
+  // =====================================
+  // CARREGAR VEICULO
+  // =====================================
+
+  function carregarSelecionado() {
+
+    const id =
+      document.getElementById('veiculoEncontrado').value;
+
+    if (!id) {
+
+      mensagem(
+        'Selecione um veículo primeiro.',
+        'erro'
+      );
+
+      return;
+    }
+
+    limparMensagem();
+
+    google.script.run
+
+      .withSuccessHandler(function(resposta) {
+
+        if (!resposta || !resposta.sucesso) {
+
+          mensagem(
+            resposta && resposta.mensagem
+              ? resposta.mensagem
+              : 'Não foi possível carregar o veículo.',
+            'erro'
+          );
+
+          return;
+        }
+
+        veiculoAtual = resposta.veiculo;
+        motoristas = resposta.motoristas || [];
+
+        preencherMotoristas();
+        preencherFormulario(veiculoAtual);
+
+        document
+          .getElementById('areaEdicao')
+          .classList.remove('oculto');
+
+        document
+          .getElementById('identificacao')
+          .textContent =
+            'Código: ' + veiculoAtual.CodigoVeiculo +
+            ' | UUID: ' + veiculoAtual.VeiculoID +
+            ' | Status: ' + veiculoAtual.Status;
+
+      })
+
+      .withFailureHandler(function(erro) {
+
+        mensagem(
+          erro.message || String(erro),
+          'erro'
+        );
+
+      })
+
+      .DCP_FORM235D_CARREGAR_VEICULO(id);
+
+  }
+
+  // =====================================
+  // LISTAR MOTORISTAS
+  // =====================================
+
+  function preencherMotoristas() {
+
+    const select =
+      document.getElementById('proprietarioMotoristaID');
+
+    select.innerHTML =
+      '<option value="">Selecione o motorista</option>';
+
+    motoristas.forEach(function(m) {
+
+      const option =
+        document.createElement('option');
+
+      option.value = m.id;
+
+      option.textContent =
+        m.codigo + ' | ' + m.nome;
+
+      select.appendChild(option);
+
+    });
+
+  }
+
+  // =====================================
+  // PREENCHER FORMULARIO
+  // =====================================
+
+  function preencherFormulario(v) {
+
+    document.getElementById('placa').value =
+      v.Placa || '';
+
+    document.getElementById('marca').value =
+      v.Marca || '';
+
+    document.getElementById('modelo').value =
+      v.Modelo || '';
+
+    document.getElementById('tipoVeiculo').value =
+      v.TipoVeiculo || '';
+
+    document.getElementById('anoFabricacao').value =
+      v.AnoFabricacao || '';
+
+    document.getElementById('anoModelo').value =
+      v.AnoModelo || '';
+
+    document.getElementById('tipoPropulsao').value =
+      v.TipoPropulsao || '';
+
+    document.getElementById('proprietarioTipo').value =
+      v.ProprietarioTipo || '';
+
+    document.getElementById('proprietarioMotoristaID').value =
+      v.ProprietarioMotoristaID || '';
+
+    document.getElementById('proprietarioNome').value =
+      v.ProprietarioNome || '';
+
+    document.getElementById('capacidadeTanqueLitros').value =
+      v.CapacidadeTanqueLitros || '';
+
+    document.getElementById('capacidadeBateriaKWh').value =
+      v.CapacidadeBateriaKWh || '';
+
+    document.getElementById('hodometroAtual').value =
+      v.HodometroAtual || '';
+
+    document.getElementById('observacoes').value =
+      v.Observacoes || '';
+
+    alterarProprietario();
+
+  }
+
+  // =====================================
+  // ALTERAR TIPO DE PROPRIETARIO
+  // =====================================
+
+  function alterarProprietario() {
+
+    const tipo =
+      document.getElementById('proprietarioTipo').value;
+
+    const motorista =
+      document.getElementById('campoMotorista');
+
+    const terceiro =
+      document.getElementById('campoTerceiro');
+
+    motorista.classList.toggle(
+      'oculto',
+      tipo !== 'MOTORISTA'
+    );
+
+    terceiro.classList.toggle(
+      'oculto',
+      tipo !== 'TERCEIRO'
+    );
+
+    document.getElementById(
+      'proprietarioMotoristaID'
+    ).required = tipo === 'MOTORISTA';
+
+    document.getElementById(
+      'proprietarioNome'
+    ).required = tipo === 'TERCEIRO';
+
+  }
+
+  // =====================================
+  // SALVAR EDICAO
+  // =====================================
+
+  function salvar(evento) {
+
+    evento.preventDefault();
+
+    if (!veiculoAtual) {
+
+      mensagem(
+        'Nenhum veículo foi carregado.',
+        'erro'
+      );
+
+      return;
+    }
+
+    const tipo =
+      document.getElementById('proprietarioTipo').value;
+
+    const dados = {
+
+      veiculoID: veiculoAtual.VeiculoID,
+
+      placa:
+        document.getElementById('placa').value,
+
+      marca:
+        document.getElementById('marca').value,
+
+      modelo:
+        document.getElementById('modelo').value,
+
+      tipoVeiculo:
+        document.getElementById('tipoVeiculo').value,
+
+      anoFabricacao:
+        document.getElementById('anoFabricacao').value,
+
+      anoModelo:
+        document.getElementById('anoModelo').value,
+
+      tipoPropulsao:
+        document.getElementById('tipoPropulsao').value,
+
+      proprietarioTipo: tipo,
+
+      proprietarioMotoristaID:
+        tipo === 'MOTORISTA'
+          ? document.getElementById('proprietarioMotoristaID').value
+          : '',
+
+      proprietarioNome:
+        tipo === 'TERCEIRO'
+          ? document.getElementById('proprietarioNome').value
+          : '',
+
+      capacidadeTanqueLitros:
+        document.getElementById('capacidadeTanqueLitros').value,
+
+      capacidadeBateriaKWh:
+        document.getElementById('capacidadeBateriaKWh').value,
+
+      hodometroAtual:
+        document.getElementById('hodometroAtual').value,
+
+      observacoes:
+        document.getElementById('observacoes').value
+
+    };
+
+    if (!confirm(
+      'Confirma a gravação das alterações deste veículo?'
+    )) {
+      return;
+    }
+
+    const botao =
+      document.getElementById('btnSalvar');
+
+    botao.disabled = true;
+    botao.textContent = 'Salvando...';
+
+    limparMensagem();
+
+    google.script.run
+
+      .withSuccessHandler(function(resposta) {
+
+        botao.disabled = false;
+        botao.textContent = 'Salvar alterações';
+
+        if (resposta && resposta.sucesso) {
+
+          if (resposta.auditoriaPendente) {
+
+            mensagem(
+              'ATENÇÃO: O veículo foi atualizado, mas a auditoria precisa ser verificada.\n' +
+              (resposta.mensagem || ''),
+              'erro'
+            );
+
+            return;
+          }
+
+          mensagem(
+            'SUCESSO! Veículo ' +
+            (resposta.codigoVeiculo || '') +
+            ' atualizado e auditado corretamente.',
+            'sucesso'
+          );
+
+        } else {
+
+          let texto =
+            resposta && resposta.mensagem
+              ? resposta.mensagem
+              : 'A edição não foi realizada.';
+
+          if (resposta && resposta.erros) {
+            texto += '\n' + resposta.erros.join('\n');
+          }
+
+          if (resposta && resposta.detalhe) {
+            texto += '\n' + resposta.detalhe;
+          }
+
+          mensagem(texto, 'erro');
+
+        }
+
+      })
+
+      .withFailureHandler(function(erro) {
+
+        botao.disabled = false;
+        botao.textContent = 'Salvar alterações';
+
+        mensagem(
+          erro.message || String(erro),
+          'erro'
+        );
+
+      })
+
+      .DCP_EDITAR_VEICULO_235D(dados);
+
+  }
+
+  // =====================================
+  // FECHAR EDICAO
+  // =====================================
+
+  function fecharEdicao() {
+
+    document
+      .getElementById('areaEdicao')
+      .classList.add('oculto');
+
+    veiculoAtual = null;
+
+  }
+
+</script>
+
+</body>
+</html>

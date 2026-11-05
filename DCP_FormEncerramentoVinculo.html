@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+
+  <meta charset="UTF-8">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 22px;
+      background: #f3f5f8;
+      color: #202938;
+      font-family: Arial, sans-serif;
+    }
+
+    h2 {
+      margin: 0 0 6px;
+      font-size: 21px;
+    }
+
+    .subtitulo {
+      color: #667085;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .aviso {
+      background: #fff8e6;
+      border: 1px solid #f1d48a;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+
+    .campo {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd2dc;
+      border-radius: 6px;
+      background: white;
+      color: #202938;
+      font-size: 13px;
+    }
+
+    textarea {
+      min-height: 85px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+    }
+
+    .dados-vinculo {
+      display: none;
+      padding: 13px;
+      margin: 10px 0 17px;
+      background: white;
+      border: 1px solid #dce2ea;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .linha {
+      display: flex;
+      gap: 12px;
+    }
+
+    .linha .campo {
+      flex: 1;
+    }
+
+    .oculto {
+      display: none;
+    }
+
+    .contador {
+      text-align: right;
+      color: #667085;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .botoes {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    button {
+      border: none;
+      border-radius: 6px;
+      padding: 11px 17px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .secundario {
+      background: #e5e9ef;
+      color: #344054;
+    }
+
+    .principal {
+      background: #175cd3;
+      color: white;
+    }
+
+    .mensagem {
+      display: none;
+      padding: 12px;
+      border-radius: 7px;
+      margin-top: 15px;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .sucesso {
+      display: block;
+      background: #ecfdf3;
+      color: #027a48;
+      border: 1px solid #abefc6;
+    }
+
+    .erro {
+      display: block;
+      background: #fef3f2;
+      color: #b42318;
+      border: 1px solid #fecdca;
+    }
+
+    .alerta {
+      display: block;
+      background: #fffaeb;
+      color: #93370d;
+      border: 1px solid #fedf89;
+    }
+
+    .rodape {
+      margin-top: 18px;
+      color: #667085;
+      font-size: 11px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>Encerramento de vínculo</h2>
+
+  <div class="subtitulo">
+    DRIVER CONTROL PRO V1.0 | Módulo 2.4.4.2
+  </div>
+
+  <div class="aviso">
+    <strong>Atenção:</strong>
+    o encerramento altera permanentemente o status do vínculo,
+    registra o histórico e gera auditoria.
+    Confira todas as informações antes de confirmar.
+  </div>
+
+
+  <div class="campo">
+    <label for="vinculo">Vínculo ativo</label>
+
+    <select id="vinculo" onchange="selecionarVinculo()">
+      <option value="">Carregando vínculos...</option>
+    </select>
+  </div>
+
+
+  <div id="dadosVinculo" class="dados-vinculo">
+    <strong>Identificação do vínculo</strong>
+    <div id="detalhesVinculo"></div>
+  </div>
+
+
+  <div class="campo">
+    <label for="modo">Modo de encerramento</label>
+
+    <select id="modo" onchange="alterarModo()">
+      <option value="IMEDIATO">
+        Imediato: registrar o horário da confirmação
+      </option>
+
+      <option value="INFORMADO">
+        Informado: fornecer data e hora efetivas
+      </option>
+    </select>
+  </div>
+
+
+  <div id="campoData" class="campo oculto">
+    <label for="dataHora">
+      Data e hora efetivas do encerramento
+    </label>
+
+    <input
+      type="datetime-local"
+      id="dataHora"
+      step="1"
+    >
+  </div>
+
+
+  <div class="campo">
+    <label for="motivo">Motivo do encerramento *</label>
+
+    <textarea
+      id="motivo"
+      maxlength="500"
+      placeholder="Informe o motivo do encerramento..."
+      oninput="atualizarContadores()"
+    ></textarea>
+
+    <div class="contador" id="contadorMotivo">
+      0/500
+    </div>
+  </div>
+
+
+  <div class="campo">
+    <label for="observacoes">Observações adicionais</label>
+
+    <textarea
+      id="observacoes"
+      maxlength="1000"
+      placeholder="Informações complementares, se necessário..."
+      oninput="atualizarContadores()"
+    ></textarea>
+
+    <div class="contador" id="contadorObservacoes">
+      0/1000
+    </div>
+  </div>
+
+
+  <div id="mensagem" class="mensagem"></div>
+
+
+  <div class="botoes">
+
+    <button
+      type="button"
+      class="secundario"
+      id="btnCancelar"
+      onclick="google.script.host.close()"
+    >
+      Cancelar
+    </button>
+
+    <button
+      type="button"
+      class="secundario"
+      id="btnRecarregar"
+      onclick="carregarVinculos()"
+    >
+      Recarregar
+    </button>
+
+    <button
+      type="button"
+      class="principal"
+      id="btnConfirmar"
+      onclick="confirmarEncerramento()"
+    >
+      Confirmar encerramento
+    </button>
+
+  </div>
+
+
+  <div class="rodape">
+    Sistema de controle operacional | America/Sao_Paulo
+  </div>
+
+
+<script>
+
+  let vinculos = [];
+  let chaveTentativa = gerarChave();
+  let enviando = false;
+  let operacaoConcluida = false;
+  let operacaoInconclusiva = false;
+
+
+  function gerarChave() {
+
+    if (
+      window.crypto &&
+      typeof window.crypto.randomUUID === 'function'
+    ) {
+      return window.crypto.randomUUID();
+    }
+
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
+      /[xy]/g,
+      function(c) {
+
+        const r = Math.random() * 16 | 0;
+
+        const v = c === 'x'
+          ? r
+          : (r & 0x3 | 0x8);
+
+        return v.toString(16);
+      }
+    );
+  }
+
+
+  function exibirMensagem(texto, tipo) {
+
+    const elemento = document.getElementById('mensagem');
+
+    elemento.className = 'mensagem ' + tipo;
+    elemento.textContent = texto;
+    elemento.style.display = 'block';
+  }
+
+
+  function limparMensagem() {
+
+    const elemento = document.getElementById('mensagem');
+
+    elemento.className = 'mensagem';
+    elemento.textContent = '';
+    elemento.style.display = 'none';
+  }
+
+
+  function bloquearFormulario() {
+
+    document.getElementById('vinculo').disabled = true;
+    document.getElementById('modo').disabled = true;
+    document.getElementById('dataHora').disabled = true;
+    document.getElementById('motivo').disabled = true;
+    document.getElementById('observacoes').disabled = true;
+
+    document.getElementById('btnConfirmar').disabled = true;
+    document.getElementById('btnRecarregar').disabled = true;
+
+    document.getElementById('btnCancelar').textContent = 'Fechar';
+  }
+
+
+  function bloquearSomenteEnvio() {
+
+    document.getElementById('btnConfirmar').disabled = true;
+    document.getElementById('btnRecarregar').disabled = true;
+
+    document.getElementById('vinculo').disabled = true;
+    document.getElementById('modo').disabled = true;
+    document.getElementById('dataHora').disabled = true;
+    document.getElementById('motivo').disabled = true;
+    document.getElementById('observacoes').disabled = true;
+  }
+
+
+  function carregarVinculos() {
+
+    if (enviando || operacaoConcluida || operacaoInconclusiva) {
+      return;
+    }
+
+    limparMensagem();
+
+    const select = document.getElementById('vinculo');
+
+    select.disabled = true;
+    select.innerHTML = '<option value="">Carregando...</option>';
+
+    document.getElementById('btnRecarregar').disabled = true;
+
+    google.script.run
+
+      .withSuccessHandler(function(resultado) {
+
+        document.getElementById('btnRecarregar').disabled = false;
+
+        if (!resultado || resultado.sucesso !== true) {
+
+          select.innerHTML =
+            '<option value="">Falha ao carregar vínculos</option>';
+
+          exibirMensagem(
+            resultado && resultado.mensagem
+              ? resultado.mensagem
+              : 'Não foi possível carregar os vínculos.',
+            'erro'
+          );
+
+          return;
+        }
+
+        vinculos = resultado.vinculos || [];
+
+        select.innerHTML = '';
+
+        if (!vinculos.length) {
+
+          select.innerHTML =
+            '<option value="">Nenhum vínculo ativo disponível</option>';
+
+          select.disabled = true;
+
+          exibirMensagem(
+            'Não existem vínculos ativos disponíveis para encerramento.',
+            'alerta'
+          );
+
+          return;
+        }
+
+        const inicial = document.createElement('option');
+
+        inicial.value = '';
+        inicial.textContent = 'Selecione um vínculo...';
+
+        select.appendChild(inicial);
+
+        vinculos.forEach(function(item) {
+
+          const opcao = document.createElement('option');
+
+          opcao.value = item.vinculoID;
+
+          opcao.textContent =
+            item.codigoVinculo +
+            ' | ' +
+            item.tipoVinculo +
+            ' | Início: ' +
+            item.inicioEm;
+
+          select.appendChild(opcao);
+
+        });
+
+        select.disabled = false;
+
+      })
+
+      .withFailureHandler(function(erro) {
+
+        select.innerHTML =
+          '<option value="">Erro no carregamento</option>';
+
+        select.disabled = true;
+
+        document.getElementById('btnRecarregar').disabled = false;
+
+        exibirMensagem(
+          erro && erro.message
+            ? erro.message
+            : 'Falha de comunicação com o servidor.',
+          'erro'
+        );
+
+      })
+
+      .DCP_FORM244_CARREGAR_DADOS();
+
+  }
+
+
+  function selecionarVinculo() {
+
+    const id = document.getElementById('vinculo').value;
+
+    const item = vinculos.find(function(v) {
+      return v.vinculoID === id;
+    });
+
+    const painel = document.getElementById('dadosVinculo');
+
+    if (!item) {
+      painel.style.display = 'none';
+      return;
+    }
+
+    document.getElementById('detalhesVinculo').textContent =
+      'Código: ' + item.codigoVinculo +
+      '\nMotorista ID: ' + item.motoristaID +
+      '\nVeículo ID: ' + item.veiculoID +
+      '\nTipo: ' + item.tipoVinculo +
+      '\nInício: ' + item.inicioEm +
+      '\nCompartilhamento autorizado: ' +
+      (item.compartilhamentoAutorizado ? 'Sim' : 'Não');
+
+    painel.style.display = 'block';
+  }
+
+
+  function alterarModo() {
+
+    const modo = document.getElementById('modo').value;
+
+    const campo = document.getElementById('campoData');
+
+    campo.style.display =
+      modo === 'INFORMADO'
+        ? 'block'
+        : 'none';
+  }
+
+
+  function atualizarContadores() {
+
+    const motivo = document.getElementById('motivo').value;
+    const observacoes = document.getElementById('observacoes').value;
+
+    document.getElementById('contadorMotivo').textContent =
+      motivo.length + '/500';
+
+    document.getElementById('contadorObservacoes').textContent =
+      observacoes.length + '/1000';
+  }
+
+
+  function validarFormulario() {
+
+    const vinculoID = document.getElementById('vinculo').value;
+    const modo = document.getElementById('modo').value;
+    const motivo = document.getElementById('motivo').value.trim();
+    const observacoes = document.getElementById('observacoes').value.trim();
+    const dataHora = document.getElementById('dataHora').value;
+
+    if (!vinculoID) {
+      throw new Error('Selecione um vínculo ativo.');
+    }
+
+    if (!motivo) {
+      throw new Error('Informe o motivo do encerramento.');
+    }
+
+    if (motivo.length > 500) {
+      throw new Error('O motivo ultrapassa 500 caracteres.');
+    }
+
+    if (observacoes.length > 1000) {
+      throw new Error('As observações ultrapassam 1000 caracteres.');
+    }
+
+    if (
+      modo === 'INFORMADO' &&
+      !dataHora
+    ) {
+      throw new Error(
+        'Informe a data e a hora efetivas do encerramento.'
+      );
+    }
+
+    if (modo === 'INFORMADO') {
+
+      const dataSelecionada = new Date(dataHora);
+
+      if (isNaN(dataSelecionada.getTime())) {
+        throw new Error('Data e hora inválidas.');
+      }
+
+      if (dataSelecionada.getTime() > Date.now()) {
+        throw new Error(
+          'Não é permitido informar uma data futura.'
+        );
+      }
+    }
+
+    return {
+      VinculoID: vinculoID,
+      ChaveTentativa: chaveTentativa,
+      ModoEncerramento: modo,
+      DataHoraEncerramento: modo === 'INFORMADO'
+        ? dataHora
+        : null,
+      Motivo: motivo,
+      Observacoes: observacoes
+    };
+  }
+
+
+  function confirmarEncerramento() {
+
+    if (
+      enviando ||
+      operacaoConcluida ||
+      operacaoInconclusiva
+    ) {
+      return;
+    }
+
+    limparMensagem();
+
+    let dados;
+
+    try {
+      dados = validarFormulario();
+    } catch (erro) {
+      exibirMensagem(erro.message, 'erro');
+      return;
+    }
+
+    const item = vinculos.find(function(v) {
+      return v.vinculoID === dados.VinculoID;
+    });
+
+    if (!item) {
+      exibirMensagem(
+        'O vínculo selecionado não está mais disponível. Recarregue a lista.',
+        'erro'
+      );
+      return;
+    }
+
+    const dataDescricao = dados.ModoEncerramento === 'IMEDIATO'
+      ? 'Horário da confirmação'
+      : dados.DataHoraEncerramento;
+
+    const confirmacao = [
+      'CONFIRMAR ENCERRAMENTO?',
+      '',
+      'Vínculo: ' + item.codigoVinculo,
+      'Tipo: ' + item.tipoVinculo,
+      'Data/hora: ' + dataDescricao,
+      '',
+      'Motivo: ' + dados.Motivo,
+      '',
+      'Esta operação atualizará o vínculo, registrará o histórico',
+      'e criará um registro de auditoria.',
+      '',
+      'Deseja continuar?'
+    ].join('\n');
+
+    if (!window.confirm(confirmacao)) {
+      return;
+    }
+
+    enviarSolicitacao(dados);
+  }
+
+
+  function enviarSolicitacao(dados) {
+
+    enviando = true;
+
+    document.getElementById('btnConfirmar').disabled = true;
+    document.getElementById('btnRecarregar').disabled = true;
+
+    document.getElementById('btnConfirmar').textContent =
+      'Processando...';
+
+    exibirMensagem(
+      'Processando encerramento. Não feche esta janela nem envie novamente.',
+      'alerta'
+    );
+
+    google.script.run
+
+      .withSuccessHandler(function(resultado) {
+
+        enviando = false;
+
+        if (!resultado) {
+
+          operacaoInconclusiva = true;
+
+          bloquearFormulario();
+
+          exibirMensagem(
+            'O servidor não retornou uma confirmação.\n' +
+            'Não repita a operação.\n' +
+            'Execute o diagnóstico de recuperação antes de qualquer nova tentativa.',
+            'alerta'
+          );
+
+          return;
+        }
+
+        if (resultado.sucesso === true) {
+
+          operacaoConcluida = true;
+
+          bloquearFormulario();
+
+          exibirMensagem(
+            'ENCERRAMENTO CONCLUÍDO\n\n' +
+            'Vínculo: ' + resultado.codigoVinculo + '\n' +
+            'Status anterior: ' + resultado.statusAnterior + '\n' +
+            'Status novo: ' + resultado.statusNovo + '\n' +
+            'Data/hora: ' + resultado.dataHoraEncerramento + '\n' +
+            'Histórico: ' + resultado.codigoHistorico + '\n' +
+            'Auditoria: ' + resultado.auditoriaID + '\n\n' +
+            resultado.mensagem,
+            'sucesso'
+          );
+
+          return;
+        }
+
+        const inconclusivo =
+          resultado.tentativaInconclusiva === true ||
+          resultado.gravacaoParcial === true ||
+          resultado.codigo === 'ENCERRAMENTO_INCONCLUSIVO' ||
+          resultado.codigo === 'TENTATIVA_INCONCLUSIVA' ||
+          resultado.codigo === 'CONCLUIDO_INCONSISTENTE';
+
+        if (inconclusivo || resultado.gravacaoRealizada === true) {
+
+          operacaoInconclusiva = true;
+
+          bloquearFormulario();
+
+          exibirMensagem(
+            'OPERAÇÃO INCONCLUSIVA\n\n' +
+            (resultado.mensagem || 'Não foi possível confirmar todas as etapas.') +
+            '\n\nNão repita a solicitação.\n' +
+            'Execute DCP_DIAGNOSTICO_RECUPERACAO_VISIVEL_244 e revise o resultado.',
+            'alerta'
+          );
+
+          return;
+        }
+
+        document.getElementById('btnConfirmar').disabled = false;
+        document.getElementById('btnRecarregar').disabled = false;
+
+        document.getElementById('btnConfirmar').textContent =
+          'Confirmar encerramento';
+
+        exibirMensagem(
+          resultado.mensagem || 'Não foi possível concluir o encerramento.',
+          'erro'
+        );
+
+      })
+
+      .withFailureHandler(function(erro) {
+
+        enviando = false;
+        operacaoInconclusiva = true;
+
+        bloquearFormulario();
+
+        exibirMensagem(
+          'FALHA DE COMUNICAÇÃO\n\n' +
+          (erro && erro.message
+            ? erro.message
+            : 'A comunicação com o servidor foi interrompida.') +
+          '\n\nNão repita a operação.\n' +
+          'Execute o diagnóstico de recuperação antes de qualquer nova tentativa.',
+          'alerta'
+        );
+
+      })
+
+      .DCP_FORM244_ENCERRAR_VINCULO(dados);
+  }
+
+
+  window.onload = function() {
+    carregarVinculos();
+    alterarModo();
+    atualizarContadores();
+  };
+
+</script>
+
+</body>
+</html>

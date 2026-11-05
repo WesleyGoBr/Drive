@@ -1,0 +1,819 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #263238;
+      margin: 0;
+      padding: 18px;
+    }
+
+    h2 {
+      margin: 0 0 6px;
+      color: #17365d;
+      font-size: 21px;
+    }
+
+    .subtitulo {
+      color: #607d8b;
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .aviso {
+      background: #fff3cd;
+      border: 1px solid #ffe08a;
+      color: #725500;
+      padding: 11px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+
+    .grupo {
+      background: #fff;
+      border: 1px solid #dce3e8;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 13px;
+    }
+
+    .grupo h3 {
+      margin: 0 0 13px;
+      font-size: 14px;
+      color: #17365d;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: bold;
+      margin: 10px 0 5px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #bdc7d0;
+      border-radius: 5px;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #2874a6;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    .linha {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .oculto { display: none; }
+
+    .info {
+      font-size: 12px;
+      color: #546e7a;
+      margin-top: 7px;
+      line-height: 1.4;
+    }
+
+    .botoes {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 5px;
+      padding: 11px 16px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .principal {
+      background: #1d5f91;
+      color: white;
+      flex: 1;
+    }
+
+    .cadastrar {
+      background: #218347;
+      color: white;
+      flex: 1;
+    }
+
+    .secundario {
+      background: #dfe5e9;
+      color: #263238;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #mensagem {
+      margin-top: 14px;
+      padding: 11px;
+      border-radius: 5px;
+      font-size: 12px;
+      display: none;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    #mensagem.sucesso {
+      display: block;
+      background: #e4f4e8;
+      color: #216e39;
+      border: 1px solid #b7dfc2;
+    }
+
+    #mensagem.erro {
+      display: block;
+      background: #fdeaea;
+      color: #a12626;
+      border: 1px solid #f1bcbc;
+    }
+
+    #mensagem.avisoMensagem {
+      display: block;
+      background: #fff3cd;
+      color: #725500;
+      border: 1px solid #ffe08a;
+    }
+
+    .rodape {
+      text-align: center;
+      font-size: 11px;
+      color: #78909c;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 420px) {
+      .linha {
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
+
+      .botoes { flex-direction: column; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>Novo vinculo</h2>
+
+  <div class="subtitulo">
+    Associacao entre motorista e veiculo
+  </div>
+
+  <div class="aviso">
+    ATENCAO: o botao "Cadastrar vinculo" realiza uma gravacao
+    definitiva na planilha. Confira os dados antes de confirmar.
+    Em caso de resultado inconclusivo, nao tente cadastrar novamente.
+  </div>
+
+  <div class="grupo">
+    <h3>1. Motorista e veiculo</h3>
+
+    <label for="motorista">Motorista *</label>
+    <select id="motorista">
+      <option value="">Carregando motoristas...</option>
+    </select>
+
+    <label for="veiculo">Veiculo *</label>
+    <select id="veiculo">
+      <option value="">Carregando veiculos...</option>
+    </select>
+
+    <div id="proprietarioInfo" class="info"></div>
+  </div>
+
+  <div class="grupo">
+    <h3>2. Caracteristicas do vinculo</h3>
+
+    <label for="tipo">Tipo de vinculo *</label>
+    <select id="tipo" onchange="alterarTipo()">
+      <option value="">Selecione</option>
+      <option value="PROPRIO">Proprio</option>
+      <option value="ALUGADO">Alugado</option>
+      <option value="CEDIDO">Cedido</option>
+    </select>
+
+    <div id="aluguel" class="oculto">
+      <div class="linha">
+        <div>
+          <label for="valorAluguel">Valor do aluguel *</label>
+          <input
+            id="valorAluguel"
+            type="number"
+            min="0.01"
+            step="0.01"
+            placeholder="Ex.: 1200,00"
+          >
+        </div>
+
+        <div>
+          <label for="periodicidade">Periodicidade *</label>
+          <select id="periodicidade">
+            <option value="">Selecione</option>
+            <option value="DIARIA">Diaria</option>
+            <option value="SEMANAL">Semanal</option>
+            <option value="MENSAL">Mensal</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <label for="compartilhamento">
+      Autorizacao de compartilhamento *
+    </label>
+
+    <select id="compartilhamento">
+      <option value="">Selecione</option>
+      <option value="true">Sim, autorizado</option>
+      <option value="false">Nao autorizado</option>
+    </select>
+
+    <div class="info">
+      A autorizacao sera exigida nos vinculos envolvidos quando
+      o mesmo veiculo tiver mais de um vinculo ativo em periodos diferentes.
+    </div>
+  </div>
+
+  <div class="grupo">
+    <h3>3. Periodo de utilizacao</h3>
+
+    <div class="linha">
+      <div>
+        <label for="inicio">Data e horario de inicio *</label>
+        <input id="inicio" type="datetime-local">
+      </div>
+
+      <div>
+        <label for="fim">Data e horario de termino</label>
+        <input id="fim" type="datetime-local">
+      </div>
+    </div>
+
+    <div class="info">
+      O termino e opcional. Quando preenchido, deve ser posterior ao inicio.
+      Os periodos sao tratados com termino exclusivo.
+    </div>
+  </div>
+
+  <div class="grupo">
+    <h3>4. Observacoes</h3>
+
+    <label for="observacoes">Observacoes (maximo 2.000 caracteres)</label>
+    <textarea
+      id="observacoes"
+      maxlength="2000"
+      placeholder="Informacoes adicionais sobre o vinculo..."
+    ></textarea>
+  </div>
+
+  <div class="botoes">
+    <button class="principal" id="botaoValidar" onclick="validarFormulario()">
+      Validar preenchimento
+    </button>
+
+    <button class="cadastrar" id="botaoCadastrar" onclick="cadastrarVinculo()">
+      Cadastrar vinculo
+    </button>
+
+    <button class="secundario" id="botaoLimpar" onclick="limparFormulario()">
+      Limpar
+    </button>
+  </div>
+
+  <div id="mensagem"></div>
+
+  <div class="rodape">
+    DRIVER CONTROL PRO | Modulo 2.4 | Cadastro de vinculos
+  </div>
+
+
+<script>
+  let listaMotoristas = [];
+  let listaVeiculos = [];
+  let carregamentoConcluido = false;
+  let cadastroEmAndamento = false;
+  let cadastroConcluido = false;
+  let tentativaInconclusiva = false;
+  let chaveTentativa = '';
+
+  function gerarChaveTentativa() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return window.crypto.randomUUID();
+    }
+
+    return 'DCP-' +
+      Date.now().toString(36) + '-' +
+      Math.random().toString(36).substring(2) + '-' +
+      Math.random().toString(36).substring(2);
+  }
+
+  function mensagem(texto, tipo) {
+    const elemento = document.getElementById('mensagem');
+    elemento.textContent = texto;
+    elemento.className = tipo;
+  }
+
+  function limparMensagem() {
+    const elemento = document.getElementById('mensagem');
+    elemento.textContent = '';
+    elemento.className = '';
+  }
+
+  function carregarDados() {
+    carregamentoConcluido = false;
+    atualizarEstadoBotoes();
+
+    mensagem('Carregando motoristas e veiculos...', 'avisoMensagem');
+
+    google.script.run
+      .withSuccessHandler(function(resposta) {
+        if (!resposta || !resposta.sucesso) {
+          mensagem(
+            resposta ? resposta.mensagem : 'Nao foi possivel carregar os dados.',
+            'erro'
+          );
+          return;
+        }
+
+        listaMotoristas = resposta.motoristas || [];
+        listaVeiculos = resposta.veiculos || [];
+
+        preencherMotoristas();
+        preencherVeiculos();
+
+        carregamentoConcluido = true;
+        atualizarEstadoBotoes();
+
+        mensagem(
+          resposta.mensagem || 'Dados carregados com sucesso.',
+          'sucesso'
+        );
+      })
+      .withFailureHandler(function(erro) {
+        mensagem(
+          'Erro ao carregar dados: ' +
+          (erro && erro.message ? erro.message : 'Erro desconhecido.'),
+          'erro'
+        );
+      })
+      .DCP_FORM243_CARREGAR_DADOS();
+  }
+
+  function preencherMotoristas() {
+    const select = document.getElementById('motorista');
+    select.innerHTML = '';
+
+    const inicial = document.createElement('option');
+    inicial.value = '';
+    inicial.textContent = 'Selecione um motorista';
+    select.appendChild(inicial);
+
+    listaMotoristas.forEach(function(item) {
+      const option = document.createElement('option');
+      option.value = item.id;
+      option.textContent = item.codigo + ' | ' + item.nome;
+      select.appendChild(option);
+    });
+  }
+
+  function preencherVeiculos() {
+    const select = document.getElementById('veiculo');
+    select.innerHTML = '';
+
+    const inicial = document.createElement('option');
+    inicial.value = '';
+    inicial.textContent = 'Selecione um veiculo';
+    select.appendChild(inicial);
+
+    listaVeiculos.forEach(function(item) {
+      const option = document.createElement('option');
+      option.value = item.id;
+      option.textContent =
+        item.codigo + ' | ' + item.placa + ' | ' +
+        item.marca + ' ' + item.modelo;
+      select.appendChild(option);
+    });
+  }
+
+  function alterarTipo() {
+    const tipo = document.getElementById('tipo').value;
+    const aluguel = document.getElementById('aluguel');
+
+    if (tipo === 'ALUGADO') {
+      aluguel.classList.remove('oculto');
+    } else {
+      aluguel.classList.add('oculto');
+      document.getElementById('valorAluguel').value = '';
+      document.getElementById('periodicidade').value = '';
+    }
+  }
+
+  function obterVeiculoSelecionado() {
+    const id = document.getElementById('veiculo').value;
+    return listaVeiculos.find(function(item) {
+      return item.id === id;
+    });
+  }
+
+  function atualizarProprietario() {
+    const veiculo = obterVeiculoSelecionado();
+    const elemento = document.getElementById('proprietarioInfo');
+
+    if (!veiculo) {
+      elemento.textContent = '';
+      return;
+    }
+
+    if (veiculo.proprietarioTipo === 'MOTORISTA') {
+      elemento.textContent =
+        'Proprietario cadastrado: ' +
+        (veiculo.proprietarioNome || 'Nome nao informado');
+    } else if (veiculo.proprietarioTipo === 'TERCEIRO') {
+      elemento.textContent =
+        'Proprietario cadastrado como terceiro: ' +
+        (veiculo.proprietarioNome || 'Nome nao informado');
+    } else {
+      elemento.textContent =
+        'Tipo de proprietario nao informado no cadastro do veiculo.';
+    }
+  }
+
+  document.getElementById('veiculo')
+    .addEventListener('change', atualizarProprietario);
+
+  function validarFormulario() {
+    limparMensagem();
+
+    if (!carregamentoConcluido) {
+      mensagem('Aguarde o carregamento dos motoristas e veiculos.', 'avisoMensagem');
+      return false;
+    }
+
+    if (cadastroEmAndamento || cadastroConcluido || tentativaInconclusiva) {
+      mensagem(
+        'Esta tentativa esta bloqueada. Nao e permitido reenviar o cadastro.',
+        'avisoMensagem'
+      );
+      return false;
+    }
+
+    const motoristaID = document.getElementById('motorista').value;
+    const veiculoID = document.getElementById('veiculo').value;
+    const tipo = document.getElementById('tipo').value;
+    const inicio = document.getElementById('inicio').value;
+    const fim = document.getElementById('fim').value;
+    const compartilhamento = document.getElementById('compartilhamento').value;
+    const valorTexto = document.getElementById('valorAluguel').value;
+    const periodicidade = document.getElementById('periodicidade').value;
+    const observacoes = document.getElementById('observacoes').value;
+
+    if (!motoristaID) {
+      mensagem('Selecione um motorista.', 'erro');
+      return false;
+    }
+
+    if (!veiculoID) {
+      mensagem('Selecione um veiculo.', 'erro');
+      return false;
+    }
+
+    if (!tipo) {
+      mensagem('Selecione o tipo de vinculo.', 'erro');
+      return false;
+    }
+
+    if (!inicio) {
+      mensagem('Informe a data e o horario de inicio.', 'erro');
+      return false;
+    }
+
+    const dataInicio = new Date(inicio);
+    const dataFim = fim ? new Date(fim) : null;
+
+    if (isNaN(dataInicio.getTime())) {
+      mensagem('A data de inicio e invalida.', 'erro');
+      return false;
+    }
+
+    if (fim && (
+      !dataFim ||
+      isNaN(dataFim.getTime()) ||
+      dataFim.getTime() <= dataInicio.getTime()
+    )) {
+      mensagem('O termino deve ser posterior ao inicio.', 'erro');
+      return false;
+    }
+
+    if (compartilhamento === '') {
+      mensagem('Informe se o compartilhamento esta autorizado.', 'erro');
+      return false;
+    }
+
+    if (tipo === 'ALUGADO') {
+      if (!valorTexto || !isFinite(Number(valorTexto)) || Number(valorTexto) <= 0) {
+        mensagem('Informe um valor de aluguel maior que zero.', 'erro');
+        return false;
+      }
+
+      if (!periodicidade) {
+        mensagem('Selecione a periodicidade do aluguel.', 'erro');
+        return false;
+      }
+    }
+
+    if (tipo !== 'ALUGADO' && (valorTexto || periodicidade)) {
+      mensagem(
+        'Dados de aluguel so podem ser preenchidos para vinculo alugado.',
+        'erro'
+      );
+      return false;
+    }
+
+    if (observacoes.length > 2000) {
+      mensagem('As observacoes ultrapassaram 2.000 caracteres.', 'erro');
+      return false;
+    }
+
+    const motorista = listaMotoristas.find(function(item) {
+      return item.id === motoristaID;
+    });
+
+    const veiculo = listaVeiculos.find(function(item) {
+      return item.id === veiculoID;
+    });
+
+    if (!motorista || !veiculo) {
+      mensagem(
+        'Motorista ou veiculo nao encontrado na lista carregada. Atualize a tela.',
+        'erro'
+      );
+      return false;
+    }
+
+    if (
+      tipo === 'PROPRIO' &&
+      (
+        veiculo.proprietarioTipo !== 'MOTORISTA' ||
+        veiculo.proprietarioMotoristaID !== motoristaID
+      )
+    ) {
+      mensagem(
+        'Vinculo proprio nao permitido: o motorista selecionado nao e o proprietario cadastrado deste veiculo.',
+        'erro'
+      );
+      return false;
+    }
+
+    mensagem(
+      'VALIDACAO LOCAL APROVADA!\n\n' +
+      'Motorista: ' + motorista.codigo + ' | ' + motorista.nome + '\n' +
+      'Veiculo: ' + veiculo.codigo + ' | ' + veiculo.placa + '\n' +
+      'Tipo: ' + tipo + '\n' +
+      'Inicio: ' + inicio + '\n' +
+      'Termino: ' + (fim || 'Sem termino definido') + '\n' +
+      'Compartilhamento autorizado: ' +
+      (compartilhamento === 'true' ? 'SIM' : 'NAO') +
+      '\n\nValidacao local concluida. Nenhum vinculo foi gravado.',
+      'sucesso'
+    );
+
+    return true;
+  }
+
+  function atualizarEstadoBotoes() {
+    const bloqueado =
+      !carregamentoConcluido ||
+      cadastroEmAndamento ||
+      cadastroConcluido ||
+      tentativaInconclusiva;
+
+    document.getElementById('botaoCadastrar').disabled = bloqueado;
+    document.getElementById('botaoValidar').disabled = bloqueado;
+    document.getElementById('botaoLimpar').disabled =
+      cadastroEmAndamento || cadastroConcluido || tentativaInconclusiva;
+  }
+
+  function cadastrarVinculo() {
+    if (
+      cadastroEmAndamento ||
+      cadastroConcluido ||
+      tentativaInconclusiva
+    ) {
+      return;
+    }
+
+    if (!validarFormulario()) return;
+
+    const motoristaID = document.getElementById('motorista').value;
+    const veiculoID = document.getElementById('veiculo').value;
+    const tipo = document.getElementById('tipo').value;
+    const inicio = document.getElementById('inicio').value;
+    const fim = document.getElementById('fim').value;
+    const compartilhamento = document.getElementById('compartilhamento').value;
+    const valorTexto = document.getElementById('valorAluguel').value;
+    const periodicidade = document.getElementById('periodicidade').value;
+    const observacoes = document.getElementById('observacoes').value;
+
+    const motorista = listaMotoristas.find(function(item) {
+      return item.id === motoristaID;
+    });
+
+    const veiculo = listaVeiculos.find(function(item) {
+      return item.id === veiculoID;
+    });
+
+    const dados = {
+      ChaveTentativa: chaveTentativa,
+      MotoristaID: motoristaID,
+      VeiculoID: veiculoID,
+      TipoVinculo: tipo,
+      InicioEm: inicio,
+      FimEm: fim || '',
+      CompartilhamentoAutorizado: compartilhamento === 'true',
+      ValorAluguel: tipo === 'ALUGADO' ? Number(valorTexto) : '',
+      PeriodicidadeAluguel: tipo === 'ALUGADO' ? periodicidade : '',
+      Observacoes: observacoes
+    };
+
+    const confirmacao =
+      'CONFIRMAR CADASTRO DE VINCULO\n\n' +
+      'Motorista: ' + motorista.nome + '\n' +
+      'Veiculo: ' + veiculo.codigo + ' | ' + veiculo.placa + '\n' +
+      'Tipo: ' + tipo + '\n' +
+      'Inicio: ' + inicio + '\n' +
+      'Termino: ' + (fim || 'Sem termino definido') + '\n\n' +
+      'Esta operacao gravara um vinculo REAL na planilha e registrara a auditoria.\n\n' +
+      'Deseja continuar?';
+
+    if (!window.confirm(confirmacao)) {
+      mensagem('Cadastro cancelado. Nenhum vinculo foi gravado.', 'avisoMensagem');
+      return;
+    }
+
+    cadastroEmAndamento = true;
+    atualizarEstadoBotoes();
+
+    document.getElementById('botaoCadastrar').textContent = 'Cadastrando...';
+
+    mensagem('Enviando cadastro ao servidor. Aguarde...', 'avisoMensagem');
+
+    google.script.run
+      .withSuccessHandler(function(resposta) {
+        cadastroEmAndamento = false;
+
+        if (!resposta) {
+          tentativaInconclusiva = true;
+          atualizarEstadoBotoes();
+          mensagem(
+            'O servidor nao retornou uma confirmacao. Nao repita o cadastro. Confira VINCULOS, CONFIG e AUDITORIA.',
+            'avisoMensagem'
+          );
+          return;
+        }
+
+        if (resposta.sucesso) {
+          cadastroConcluido = true;
+          atualizarEstadoBotoes();
+
+          document.getElementById('botaoCadastrar').textContent =
+            'Cadastro concluido';
+
+          let texto = 'VINCULO CADASTRADO!\n\n';
+          texto += 'Codigo: ' + (resposta.codigoVinculo || 'Nao informado') + '\n';
+          texto += 'Motorista: ' + (resposta.motorista || motorista.nome) + '\n';
+          texto += 'Veiculo: ' +
+            (resposta.veiculo || (veiculo.codigo + ' | ' + veiculo.placa)) + '\n';
+          texto += 'Tipo: ' + (resposta.tipoVinculo || tipo) + '\n';
+          texto += 'Status: ' + (resposta.status || 'ATIVO');
+
+          if (resposta.auditoriaPendente) {
+            texto +=
+              '\n\nATENCAO: o vinculo foi gravado, mas a auditoria precisa ser conferida. Nao repita o cadastro.';
+            mensagem(texto, 'avisoMensagem');
+          } else {
+            texto += '\n\nConfira as abas VINCULOS, CONFIG e AUDITORIA.';
+            mensagem(texto, 'sucesso');
+          }
+          return;
+        }
+
+        // Conflitos e validacoes recusadas antes da reserva da tentativa
+        // podem ser corrigidos e enviados novamente com nova chave.
+        if (
+          resposta.codigo === 'CONFLITO_DE_VINCULO' ||
+          resposta.gravacaoRealizada === false &&
+          !resposta.tentativaInconclusiva &&
+          !resposta.gravacaoParcial
+        ) {
+          cadastroConcluido = false;
+          chaveTentativa = gerarChaveTentativa();
+          atualizarEstadoBotoes();
+          document.getElementById('botaoCadastrar').textContent =
+            'Cadastrar vinculo';
+
+          let texto = resposta.mensagem || 'Cadastro nao realizado.';
+          if (resposta.conflitos) {
+            texto += '\n\n';
+            resposta.conflitos.forEach(function(item) {
+              texto += '- ' + item.mensagem + '\n';
+            });
+          }
+          if (resposta.orientacao) texto += '\n' + resposta.orientacao;
+          mensagem(texto, 'erro');
+          return;
+        }
+
+        // Falha parcial, tentativa existente ou resultado incerto:
+        // bloqueia o formulario para impedir novo envio.
+        tentativaInconclusiva = true;
+        atualizarEstadoBotoes();
+
+        let texto = resposta.mensagem || 'Resultado inconclusivo.';
+        if (resposta.detalhe) texto += '\n' + resposta.detalhe;
+        if (resposta.orientacao) texto += '\n' + resposta.orientacao;
+
+        texto +=
+          '\n\nFORMULARIO BLOQUEADO. Nao tente novamente. Confira VINCULOS, CONFIG e AUDITORIA.';
+
+        mensagem(texto, 'avisoMensagem');
+      })
+      .withFailureHandler(function(erro) {
+        cadastroEmAndamento = false;
+        tentativaInconclusiva = true;
+        atualizarEstadoBotoes();
+
+        mensagem(
+          'Falha de comunicacao com o servidor: ' +
+          (erro && erro.message ? erro.message : 'Erro desconhecido.') +
+          '\n\nO resultado da gravacao e desconhecido. O formulario foi bloqueado para evitar duplicidade. Confira VINCULOS, CONFIG e AUDITORIA.',
+          'avisoMensagem'
+        );
+      })
+      .DCP_FORM243_CADASTRAR_VINCULO(dados);
+  }
+
+  function limparFormulario() {
+    if (
+      cadastroEmAndamento ||
+      cadastroConcluido ||
+      tentativaInconclusiva
+    ) {
+      return;
+    }
+
+    document.getElementById('motorista').value = '';
+    document.getElementById('veiculo').value = '';
+    document.getElementById('tipo').value = '';
+    document.getElementById('inicio').value = '';
+    document.getElementById('fim').value = '';
+    document.getElementById('compartilhamento').value = '';
+    document.getElementById('valorAluguel').value = '';
+    document.getElementById('periodicidade').value = '';
+    document.getElementById('observacoes').value = '';
+
+    document.getElementById('aluguel').classList.add('oculto');
+
+    atualizarProprietario();
+    limparMensagem();
+
+    // Uma nova tentativa recebe uma nova chave.
+    chaveTentativa = gerarChaveTentativa();
+
+    atualizarEstadoBotoes();
+  }
+
+  // Uma chave exclusiva por formulario aberto.
+  chaveTentativa = gerarChaveTentativa();
+
+  carregarDados();
+</script>
+
+</body>
+</html>
